@@ -19,7 +19,7 @@ Create Database and User
     CREATE DATABASE lrs;
     CREATE USER 'lrs_user'@'localhost' identified by 'lrs_pass'
     GRANT ALL ON lrs.* TO 'lrs_user'@'localhost';
-    exit (logout as system postgres user)
+    exit (logout as MySQL admin)
 
 Create Desired Directory for LRS
 
