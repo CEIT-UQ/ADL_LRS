@@ -1,58 +1,50 @@
-# ADL LRS 
+# UQ LRS 
 
-#### Installation tested on Ubuntu 12.10 machine with Python 2.7.3. Should be good with Ubuntu 10.04 LTS - 13.04 releases and Python 2.6.X+. This is still in the development stage and NOT ready for production
+#### Installed on CentOS 6.4 (minimal) with Python 2.6. MySQL database used; please visit https://github.com/adlnet/ADL_LRS for PostgreSQL instuctions.
 
 ## Installation
 
 Software Installation
 
-    sudo apt-get install git fabric postgresql-9.1 python-setuptools postgresql-server-dev-9.1 python-dev
+    sudo yum install python-devel gcc python-setuptools
+    sudo yum install libxml2 libxml2-devel libxml2-python python-lxml
+    sudo yum install libbxslt libxslt-devel libxslt-python
+    sudo yum install mysql, mysql-devel,  mysql-server, MySQL-python
     sudo easy_install pip
     sudo pip install virtualenv
 
-Setup Postgres
+Create Database and User
 
-    sudo passwd postgres (set password for postgres system user)
-    sudo -u postgres createuser -P <db_owner> (create postgres user that will be owner of the db - make superuser)
-    su postgres
-    psql template1
-    
-Create database inside of postgres shell
-
-    CREATE DATABASE lrs OWNER <db_owner>;
-    \q (exits shell)
+    mysql -u root -p (login as MySQL admin)
+    CREATE DATABASE lrs;
+    CREATE USER 'lrs_user'@'localhost' identified by 'lrs_pass'
+    GRANT ALL ON lrs.* TO 'lrs_user'@'localhost';
     exit (logout as system postgres user)
-    
-Create ADL LRS system user
 
-    sudo useradd -c "ADL Learning Record Store System" -m -s "/bin/bash" adllrs
-    sudo passwd adllrs (set password)
-    su adllrs
-    cd ~
-    
-Create desired directory to keep LRS
+Create Desired Directory for LRS
 
-    mkdir <dir_name>
-    cd <dir_name>
-    
-Clone the LRS repository
+    mkdir lrs_folder
+    cd lrs_folder
 
-    git clone https://github.com/adlnet/ADL_LRS.git
+Clone UQ LRS Respository
+
+    git clone https://github.com/CEIT-UQ/ADL_LRS.git
     cd ADL_LRS
-    
-Note: Under ADL_LRS/adl_lrs/settings.py, make sure the database USER and PASSWORD are the same as the db_owner created
-earlier. Also, be sure to replace the current SECRET_KEY flag with a secret string of your own, and be sure not to share it.
 
-Setup the environment
+Edit UQ LRS Settings
+
+	vim adl_lrs/settings.py
+
+Setup Virtual Environment
 
     fab setup_env
     source ../env/bin/activate 
-    
-Setup the LRS (creates media directories and cache tables, then syncs database)
 
-    fab setup_lrs (when prompted make adllrs a Django superuser)
+Create UQ LRS Database
 
-## Starting
+    fab setup_lrs (when prompted make lrs_admin a Django superuser)
+
+## Start LRS
 While still in the ADL_LRS directory, run
 
     supervisord
@@ -70,6 +62,12 @@ Nginx. For a more detailed description of the tools being used in general, visit
 ## Test LRS
     
     fab test_lrs
+
+## Shutdown LRS
+
+    supervisorctl (note the process ID)
+    kill process_id
+    unlink /tmp/supervisor.sock
 
 ## Helpful Information
     
