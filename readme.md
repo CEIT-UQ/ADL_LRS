@@ -53,7 +53,7 @@ Setup NGINX
     vim /etc/nginx/conf.d/default.conf
     server {
         listen       80;
-        server_name  lrs.ceit.uq.edu.au;
+        server_name  domain.com;
         access_log   /var/log/nginx/access_log;
         rewrite      ^ https://$server_name$request_uri? permanent;
     }
@@ -61,7 +61,7 @@ Setup NGINX
     vim /etc/nginx/conf.d/ssl.conf
     server {
 	    listen       443;
-	    server_name  lrs.ceit.uq.edu.au;
+	    server_name  domain.com;
 	    access_log /var/log/nginx/ssl_access_log;
 	    ssl                  on;
 	    ssl_certificate      /etc/pki/tls/certs/cert_file.crt;
