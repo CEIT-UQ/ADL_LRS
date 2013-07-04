@@ -44,7 +44,54 @@ Create UQ LRS Database
 
     fab setup_lrs (when prompted make lrs_admin a Django superuser)
 
+Install NGINX
+
+	yum install nginx
+	
+Setup NGINX
+
+    vim /etc/nginx/conf.d/default.conf
+    server {
+        listen       80;
+        server_name  lrs.ceit.uq.edu.au;
+        access_log   /var/log/nginx/access_log;
+        rewrite      ^ https://$server_name$request_uri? permanent;
+    }
+
+    vim /etc/nginx/conf.d/ssl.conf
+    server {
+	    listen       443;
+	    server_name  lrs.ceit.uq.edu.au;
+	    access_log /var/log/nginx/ssl_access_log;
+	    ssl                  on;
+	    ssl_certificate      /etc/pki/tls/certs/cert_file.crt;
+	    ssl_certificate_key  /etc/pki/tls/private/cert.key;
+	    ssl_session_timeout  5m;
+	    ssl_protocols  SSLv2 SSLv3 TLSv1;
+	    ssl_ciphers  HIGH:!aNULL:!MD5;
+	    ssl_prefer_server_ciphers   on;
+	    location / {
+	        proxy_pass_header Server;
+	        proxy_set_header Host $http_host;
+	        proxy_redirect off;
+	        proxy_set_header X-Forwarded-For $remote_addr;
+	        proxy_set_header X-Scheme $scheme;
+	        proxy_connect_timeout 10;
+	        proxy_read_timeout 10;
+	        proxy_pass http://127.0.0.1:8000/;
+	    }
+	}
+
+## Start NGINX
+
+    nginx
+    
+## Stop NGINX
+
+    nginx -s stop
+
 ## Start LRS
+
 While still in the ADL_LRS directory, run
 
     supervisord
@@ -54,10 +101,6 @@ To verify it's running
     supervisorctl
 
 You should see a task named web running. This will host the application using gunicorn with 2 worker processes.
-If you open a browser and visit http://localhost:8000/xapi you will hit the LRS. Gunicorn does not serve static files
-so no CSS will be present. This is fine if you're doing testing/development but if you want to host a production-ready
-LRS, Nginx needs to be setup to work with Gunicorn to serve static files. Please read these instructions for including
-Nginx. For a more detailed description of the tools being used in general, visit [here](https://github.com/adlnet/ADL_LRS/wiki/Putting-the-Pieces-Together).
 
 ## Test LRS
     
@@ -65,9 +108,12 @@ Nginx. For a more detailed description of the tools being used in general, visit
 
 ## Shutdown LRS
 
-    supervisorctl (note the process ID)
-    kill process_id
+    supervisorctl (enter supervisor shell)
+    stop all
+    exit (leave supervisor shell)
     unlink /tmp/supervisor.sock
+
+## 
 
 ## Helpful Information
     
